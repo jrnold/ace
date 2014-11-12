@@ -184,7 +184,7 @@ function jsFileList(path, filter) {
         filter = /_test/;
 
     return fs.readdirSync(path).map(function(x) {
-        if (x.slice(-3) == ".js" && !filter.test(x) && !/\s/.test(x))
+        if (x.slice(-3) == ".js" && !filter.test(x) && !/\s|BASE|(\b|_)dummy(\b|_)/.test(x))
             return x.slice(0, -3);
     }).filter(Boolean);
 }
@@ -359,7 +359,7 @@ function buildAce(options) {
         buildSubmodule(options, {
             projectType: "theme",
             require: ["ace/theme/" + name]
-        }, "theme-" +  name.replace("_theme", ""));
+        }, "theme-" +  name);
     });
     // keybindings
     ["vim", "emacs"].forEach(function(name) {
@@ -502,7 +502,7 @@ function exportAce(ns, modules, requireBase, extModules) {
         if (typeof modules == "string")
             modules = [modules];
             
-        return (text + ";" + template
+        return (text.replace(/;\s*$/, "") + ";" + template
             .toString()
             .replace(/MODULES/g, JSON.stringify(modules))
             .replace(/REQUIRE_NS/g, requireBase)
@@ -536,7 +536,7 @@ function generateThemesModule(themes) {
 function addSnippetFile(modeName) {
     var snippetFilePath = ACE_HOME + "/lib/ace/snippets/" + modeName;
     if (!fs.existsSync(snippetFilePath + ".js")) {
-        copy.file(ACE_HOME + "/tool/snippets.tmpl.js", snippetFilePath + ".js", function(t) {
+        copy.file(ACE_HOME + "/tool/templates/snippets.js", snippetFilePath + ".js", function(t) {
             return t.replace(/%modeName%/g, modeName);
         });
     }
